@@ -2,6 +2,8 @@ package com.mrunali.peopleflow.service.impl;
 
 import com.mrunali.peopleflow.entity.Employee;
 import java.util.List;
+
+import com.mrunali.peopleflow.exception.EmployeeNotFoundException;
 import com.mrunali.peopleflow.repository.EmployeeRepository;
 import com.mrunali.peopleflow.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id).orElse(null);
+
+        return employeeRepository.findById(id)
+                .orElseThrow(() ->
+                        new EmployeeNotFoundException(
+                                "Employee with id: " + id + " not found."
+                        )
+                );
     }
 
     @Override
