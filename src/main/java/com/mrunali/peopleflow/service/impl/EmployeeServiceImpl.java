@@ -1,11 +1,13 @@
 package com.mrunali.peopleflow.service.impl;
 
+import com.mrunali.peopleflow.dto.EmployeeRequestDTO;
 import com.mrunali.peopleflow.entity.Employee;
 import java.util.List;
 
 import com.mrunali.peopleflow.exception.EmployeeNotFoundException;
 import com.mrunali.peopleflow.repository.EmployeeRepository;
 import com.mrunali.peopleflow.service.EmployeeService;
+import com.mrunali.peopleflow.dto.EmployeeResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,33 +22,38 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public List<EmployeeResponseDTO> getAllEmployees() {
+
+        return employeeRepository.findAll()
+                .stream()
+                .map(this::convertToResponseDTO)
+                .toList();
     }
 
     @Override
-    public Employee getEmployeeById(Long id) {
+    public EmployeeResponseDTO getEmployeeById(Long id) {
 
-        return employeeRepository.findById(id)
+        Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() ->
                         new EmployeeNotFoundException(
-                                "Employee with id: " + id + " not found."
+                                "Employee not found with id: " + id
                         )
                 );
+        return convertToResponseDTO(employee);
     }
 
     @Override
-    public Employee updateEmployee(Employee employee, Long id) {
+    public Employee updateEmployee(EmployeeRequestDTO employeeRequestDTO, Long id) {
         Employee existingEmployee = employeeRepository.findById(id).orElse(null);
 
         if (existingEmployee != null) {
-            existingEmployee.setFirstName(employee.getFirstName());
-            existingEmployee.setLastName(employee.getLastName());
-            existingEmployee.setEmail(employee.getEmail());
-            existingEmployee.setPhone(employee.getPhone());
-            existingEmployee.setDepartment(employee.getDepartment());
-            existingEmployee.setDesignation(employee.getDesignation());
-            existingEmployee.setSalary(employee.getSalary());
+            existingEmployee.setFirstName(employeeRequestDTO.getFirstName());
+            existingEmployee.setLastName(employeeRequestDTO.getLastName());
+            existingEmployee.setEmail(employeeRequestDTO.getEmail());
+            existingEmployee.setPhone(employeeRequestDTO.getPhone());
+            existingEmployee.setDepartment(employeeRequestDTO.getDepartment());
+            existingEmployee.setDesignation(employeeRequestDTO.getDesignation());
+            existingEmployee.setSalary(employeeRequestDTO.getSalary());
 
             return employeeRepository.save(existingEmployee);
         }
@@ -56,5 +63,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void deleteEmployee(Long id) {
         employeeRepository.deleteById(id);
+    }
+
+    @Override
+    public EmployeeResponseDTO convertToResponseDTO(Employee employee) {
+        return new EmployeeResponseDTO(
+                employee.getId(),
+                employee.getFirstName(),
+                employee.getLastName(),
+                employee.getEmail(),
+                employee.getPhone(),
+                employee.getDepartment(),
+                employee.getDesignation(),
+                employee.getSalary()
+        );
     }
 }
