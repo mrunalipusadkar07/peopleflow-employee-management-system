@@ -5,6 +5,7 @@ import com.mrunali.peopleflow.entity.Employee;
 import java.util.List;
 
 import com.mrunali.peopleflow.exception.EmployeeNotFoundException;
+import com.mrunali.peopleflow.mapper.EmployeeMapper;
 import com.mrunali.peopleflow.repository.EmployeeRepository;
 import com.mrunali.peopleflow.service.EmployeeService;
 import com.mrunali.peopleflow.dto.EmployeeResponseDTO;
@@ -13,8 +14,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
-    @Autowired
     private EmployeeRepository employeeRepository;
+    private final EmployeeMapper employeeMapper;
+
+    @Autowired
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper employeeMapper) {
+        this.employeeRepository = employeeRepository;
+        this.employeeMapper = employeeMapper;
+    }
 
     @Override
     public Employee saveEmployee(Employee employee) {
@@ -26,7 +33,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return employeeRepository.findAll()
                 .stream()
-                .map(this::convertToResponseDTO)
+                .map(employeeMapper::toResponseDTO)
                 .toList();
     }
 
@@ -39,25 +46,19 @@ public class EmployeeServiceImpl implements EmployeeService {
                                 "Employee not found with id: " + id
                         )
                 );
-        return convertToResponseDTO(employee);
+        return employeeMapper.toResponseDTO(employee);
     }
 
     @Override
     public Employee updateEmployee(EmployeeRequestDTO employeeRequestDTO, Long id) {
-        Employee existingEmployee = employeeRepository.findById(id).orElse(null);
 
-        if (existingEmployee != null) {
-            existingEmployee.setFirstName(employeeRequestDTO.getFirstName());
-            existingEmployee.setLastName(employeeRequestDTO.getLastName());
-            existingEmployee.setEmail(employeeRequestDTO.getEmail());
-            existingEmployee.setPhone(employeeRequestDTO.getPhone());
-            existingEmployee.setDepartment(employeeRequestDTO.getDepartment());
-            existingEmployee.setDesignation(employeeRequestDTO.getDesignation());
-            existingEmployee.setSalary(employeeRequestDTO.getSalary());
+        Employee existingEmployee = employeeRepository.findById(id).
+                orElseThrow(() ->
+                        new EmployeeNotFoundException("Employee not found with id: " + id)
+                );
+        employeeMapper.updateEntity(existingEmployee, employeeRequestDTO);
 
-            return employeeRepository.save(existingEmployee);
-        }
-        return null;
+        return employeeRepository.save(existingEmployee);
     }
 
     @Override
@@ -65,6 +66,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.deleteById(id);
     }
 
+    /*
     @Override
     public EmployeeResponseDTO convertToResponseDTO(Employee employee) {
         return new EmployeeResponseDTO(
@@ -78,4 +80,5 @@ public class EmployeeServiceImpl implements EmployeeService {
                 employee.getSalary()
         );
     }
+    */
 }

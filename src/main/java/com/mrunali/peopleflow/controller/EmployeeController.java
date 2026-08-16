@@ -4,6 +4,7 @@ import com.mrunali.peopleflow.entity.Employee;
 import com.mrunali.peopleflow.service.EmployeeService;
 import com.mrunali.peopleflow.dto.EmployeeRequestDTO;
 import com.mrunali.peopleflow.dto.EmployeeResponseDTO;
+import com.mrunali.peopleflow.mapper.EmployeeMapper;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -13,26 +14,20 @@ import java.util.List;
 @RequestMapping("/api/employees")
 public class EmployeeController {
     private final EmployeeService employeeService;
+    private final EmployeeMapper employeeMapper;
 
-    public EmployeeController(EmployeeService employeeService) {
+    public EmployeeController(EmployeeService employeeService, EmployeeMapper employeeMapper) {
         this.employeeService = employeeService;
+        this.employeeMapper = employeeMapper;
     }
 
     @PostMapping
     public EmployeeResponseDTO createEmployee(@Valid @RequestBody EmployeeRequestDTO employeeRequestDTO) {
 
-        Employee employee = new Employee();
-
-        employee.setFirstName(employeeRequestDTO.getFirstName());
-        employee.setLastName(employeeRequestDTO.getLastName());
-        employee.setEmail(employeeRequestDTO.getEmail());
-        employee.setPhone(employeeRequestDTO.getPhone());
-        employee.setDepartment(employeeRequestDTO.getDepartment());
-        employee.setDesignation(employeeRequestDTO.getDesignation());
-        employee.setSalary(employeeRequestDTO.getSalary());
+        Employee employee = employeeMapper.toEntity(employeeRequestDTO);
 
         Employee savedEmployee = employeeService.saveEmployee(employee);
-        return employeeService.convertToResponseDTO(savedEmployee);
+        return employeeMapper.toResponseDTO(savedEmployee);
     }
 
     @GetMapping
@@ -49,7 +44,7 @@ public class EmployeeController {
     public EmployeeResponseDTO updateEmployee(@RequestBody EmployeeRequestDTO employeeRequestDTO,
                                    @PathVariable Long id) {
         Employee employee = employeeService.updateEmployee(employeeRequestDTO, id);
-        return employeeService.convertToResponseDTO(employee);
+        return employeeMapper.toResponseDTO(employee);
     }
 
     @DeleteMapping("/{id}")
