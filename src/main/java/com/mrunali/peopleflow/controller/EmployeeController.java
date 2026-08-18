@@ -6,6 +6,8 @@ import com.mrunali.peopleflow.dto.EmployeeRequestDTO;
 import com.mrunali.peopleflow.dto.EmployeeResponseDTO;
 import com.mrunali.peopleflow.mapper.EmployeeMapper;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -22,12 +24,15 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public EmployeeResponseDTO createEmployee(@Valid @RequestBody EmployeeRequestDTO employeeRequestDTO) {
+    public ResponseEntity<EmployeeResponseDTO> createEmployee(@Valid @RequestBody EmployeeRequestDTO employeeRequestDTO) {
 
         Employee employee = employeeMapper.toEntity(employeeRequestDTO);
 
         Employee savedEmployee = employeeService.saveEmployee(employee);
-        return employeeMapper.toResponseDTO(savedEmployee);
+
+        EmployeeResponseDTO employeeResponseDTO = employeeMapper.toResponseDTO(savedEmployee);
+
+        return new ResponseEntity<>(employeeResponseDTO, HttpStatus.CREATED);
     }
 
     @GetMapping

@@ -63,22 +63,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void deleteEmployee(Long id) {
-        employeeRepository.deleteById(id);
+        Employee employee = employeeRepository.findById(id)
+                        .orElseThrow(() ->
+                                new EmployeeNotFoundException(
+                                        "Employee not found with id: " + id
+                                ));
+
+        employeeRepository.delete(employee);
     }
 
-    /*
-    @Override
-    public EmployeeResponseDTO convertToResponseDTO(Employee employee) {
-        return new EmployeeResponseDTO(
-                employee.getId(),
-                employee.getFirstName(),
-                employee.getLastName(),
-                employee.getEmail(),
-                employee.getPhone(),
-                employee.getDepartment(),
-                employee.getDesignation(),
-                employee.getSalary()
-        );
-    }
-    */
 }
