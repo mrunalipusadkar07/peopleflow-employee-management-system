@@ -40,6 +40,26 @@ public class EmployeeController {
         return employeeService.getAllEmployees();
     }
 
+    @GetMapping("/search")
+    public List<EmployeeResponseDTO> searchEmployees(
+            @RequestParam String name) {
+        return employeeService.searchEmployees(name);
+    }
+
+    @GetMapping("/search/department")
+    public List<EmployeeResponseDTO> searchEmployeesByDepartment(
+            @RequestParam String department) {
+
+        return employeeService.searchEmployeesByDepartment(department);
+    }
+
+    @GetMapping("/search/designation")
+    public List<EmployeeResponseDTO> searchEmployeesByDesignation(
+            @RequestParam String designation) {
+
+        return employeeService.searchEmployeesByDesignation(designation);
+    }
+
     @GetMapping("/{id}")
     public EmployeeResponseDTO getEmployeeById(@PathVariable Long id) {
         return employeeService.getEmployeeById(id);

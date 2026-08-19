@@ -50,6 +50,36 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    public List<EmployeeResponseDTO> searchEmployees(String name) {
+
+        return employeeRepository
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name)
+                .stream()
+                .map(employeeMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<EmployeeResponseDTO> searchEmployeesByDepartment(String department) {
+
+        return employeeRepository
+                .findByDepartmentContainingIgnoreCase(department)
+                .stream()
+                .map(employeeMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<EmployeeResponseDTO> searchEmployeesByDesignation(String designation) {
+
+        return employeeRepository
+                .findByDesignationContainingIgnoreCase(designation)
+                .stream()
+                .map(employeeMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     public Employee updateEmployee(EmployeeRequestDTO employeeRequestDTO, Long id) {
 
         Employee existingEmployee = employeeRepository.findById(id).
