@@ -3,6 +3,7 @@ package com.mrunali.peopleflow.service.impl;
 import com.mrunali.peopleflow.dto.EmployeeRequestDTO;
 import com.mrunali.peopleflow.entity.Employee;
 import java.util.List;
+import java.util.Set;
 
 import com.mrunali.peopleflow.exception.EmployeeNotFoundException;
 import com.mrunali.peopleflow.mapper.EmployeeMapper;
@@ -11,11 +12,24 @@ import com.mrunali.peopleflow.service.EmployeeService;
 import com.mrunali.peopleflow.dto.EmployeeResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private static final Set<String> ALLOWED_SORT_FIELDS =
+            Set.of(
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "department",
+                    "designation",
+                    "salary"
+            );
 
     @Autowired
     public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper employeeMapper) {
@@ -29,12 +43,31 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<EmployeeResponseDTO> getAllEmployees() {
+    public Page<EmployeeResponseDTO> getAllEmployees(
+            int page, int size, String sortBy, String direction) {
 
-        return employeeRepository.findAll()
-                .stream()
-                .map(employeeMapper::toResponseDTO)
-                .toList();
+        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+            throw new IllegalArgumentException(
+                    "Invalid sort field: " + sortBy
+            );
+        }
+
+        Sort.Direction sortDirection;
+        if (direction.equalsIgnoreCase("asc")) {
+            sortDirection = Sort.Direction.ASC;
+        } else if (direction.equalsIgnoreCase("desc")) {
+            sortDirection = Sort.Direction.DESC;
+        } else {
+            throw new IllegalArgumentException(
+                    "Invalid sort direction: " + direction
+            );
+        }
+
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(sortDirection, sortBy));
+
+        return employeeRepository.findAll(pageable)
+                .map(employeeMapper::toResponseDTO);
     }
 
     @Override

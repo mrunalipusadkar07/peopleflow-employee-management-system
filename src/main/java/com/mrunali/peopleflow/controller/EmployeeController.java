@@ -8,6 +8,7 @@ import com.mrunali.peopleflow.mapper.EmployeeMapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -36,8 +37,14 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public List<EmployeeResponseDTO> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public Page<EmployeeResponseDTO> getAllEmployees(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        return employeeService.getAllEmployees(
+                page, size, sortBy, direction);
     }
 
     @GetMapping("/search")

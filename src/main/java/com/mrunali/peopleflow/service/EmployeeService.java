@@ -3,6 +3,7 @@ package com.mrunali.peopleflow.service;
 import com.mrunali.peopleflow.dto.EmployeeRequestDTO;
 import com.mrunali.peopleflow.entity.Employee;
 import com.mrunali.peopleflow.dto.EmployeeResponseDTO;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -10,7 +11,8 @@ public interface EmployeeService {
 
     Employee saveEmployee(Employee employee);
 
-    List<EmployeeResponseDTO> getAllEmployees();
+    Page<EmployeeResponseDTO> getAllEmployees(
+            int page, int size, String sortBy, String direction);
 
     EmployeeResponseDTO getEmployeeById(Long id);
 
